@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Type Ahead 👀</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -19,6 +19,8 @@
     <script>
         const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
         const cities = [];
+        const input = document.querySelector('.search');
+        const suggestions = document.querySelector('.suggestions');
         fetch(endpoint)
             .then(response => {
                 console.log(response);
@@ -33,6 +35,32 @@
                 console.log(cities);
             })
             .catch(err => console.log(err))
+        
+        const findMatches = (wordToMatch, arr) => {
+            return arr.filter(place => {
+                const regex = new RegExp(wordToMatch, 'gi');
+                return place.city.match(regex) || place.state.match(regex);
+            })
+        }
+        const displayMatches = (e) => {
+            let wordToMatch = e.target.value;
+            const matchArr = findMatches(wordToMatch, cities);
+            const html = matchArr.map(place => {
+                const inputReg = new RegExp(wordToMatch, 'gi');
+                const cityWithStyles = place.city.replace(inputReg, `<span class="hl">${wordToMatch}</span>`)
+                const stateWithStyles = place.state.replace(inputReg, `<span class="hl">${wordToMatch}</span>`)
+                return `
+                    <li>
+                        <span class="name">${cityWithStyles}, ${stateWithStyles}</span>
+                        <span class="population">${place.population}</span>
+                    </li>
+                `
+            }).join('');
+            return suggestions.innerHTML = html;
+        };
+
+        input.addEventListener('input', displayMatches);
+        input.addEventListener('change', displayMatches);
     </script>
 </body>
 
